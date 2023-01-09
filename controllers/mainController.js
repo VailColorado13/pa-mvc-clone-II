@@ -1,32 +1,34 @@
 const titleParser = require('./titleParser')
 const Todo = require('../models/Todo')
 
-module.exports = {
-    renderHome: (req, res) => {
-        res.render('blankIndex.ejs')
-    },
+function Controller() {
+  this.dropped = false;
 
-    handleDrop: async (req, res) => {
-        try {
-          fileNames = req.body.names
-          parsedTitles = await titleParser.parse(fileNames) 
-          await Todo.create({todo: parsedTitles, completed: false})
-      
-          res.redirect('/renderWritten');
-        } catch(err) {
-          console.log(err)
-        }
-      },
+  this.renderHome = async (req, res) => {
+    //const todoItems = await Todo.find();
+    console.log('dropped', this.dropped);
+    res.render('index.ejs', {
+      todos: this.dropped === false ? 'dropped is false' : 'dropped is true',
+    });
+    this.dropped = false
+  };
 
-      renderWritten: (req,res)=>{
-        try{
-            res.render('writtenIndex.ejs')
-            console.log('active')
-        }catch(err){
-            console.log(err)
-        }
-      },
+  this.handleDrop = async (req, res) => {
+    try {
+      fileNames = req.body.names;
+      parsedTitles = await titleParser.parse(fileNames);
+      await Todo.create({ todo: parsedTitles, completed: false });
+      this.dropped = true;
+      res.redirect('/');
+    } catch (err) {
+      console.log(err);
+    }
+  };
 }
+
+module.exports = new Controller();
+
+
 
 
 //From ChatGPT
